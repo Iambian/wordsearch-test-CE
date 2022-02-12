@@ -1,7 +1,19 @@
-### CE C SDK Template
+Wordle Word Search Test Program
+===============================
 
-You can clone this directory for your own projects.
+For the *TI-84 Plus CE* graphing calculator.
 
-To add code, fill in the `int main(void)` function in main.c. You can also create
-your own source and header files and add them to the directory; the makefile
-will automatically find and compile the new source files.
+This is a performance test of a data and search algorithm. Which can be used
+elsewhere. Or in their own ez80 implementation.
+
+Contents:
+
+* `src/main.c` : Basic tests. Uses constants that was pulled from interactive
+  session by running `tools/databuild.py` in order to verify goodness of data.
+  Then it runs a perf test by running the code in worst case 100 times. Uses
+  a big chunk of the stopwatch example program to time things and output
+  data to the screen.
+* `search.asm` : Contains routines to perform search. TODO: Add routine to
+  retrieve a word based on index. Index can be generated from pieces of code
+  used in `tools/databuild.py`
+

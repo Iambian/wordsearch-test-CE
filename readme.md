@@ -17,3 +17,17 @@ Contents:
   retrieve a word based on index. Index can be generated from pieces of code
   used in `tools/databuild.py`
 
+**This is not intended to be used by itself**; all I really wanted to do was
+scratch that itch when I saw this: https://www.cemetech.net/forum/viewtopic.php?t=18411
+
+TODO: Maybe pass the data block through a ZX7 compressor to see if it can
+further compress things? This was an entry to an impromptu compression contest
+and as it stands, this thing doesn't compress all that well. All it does is
+go fast (but not fast enough, apparently. 73.5ms is still too slow for the
+50ms requirement)
+
+License
+-------
+
+MIT all the way.
+

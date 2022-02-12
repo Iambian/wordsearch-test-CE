@@ -1,0 +1,9 @@
+TODO LISTS
+
+Come up with ANY sort of solution in order to advance the project.
+Current contenders are as follows:
+1. Bogosort and keep best result.
+2. Use standard sort but use hamming distance as sort metric and hope that
+   it doesn't crash the sorter.
+
+

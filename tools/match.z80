@@ -1,0 +1,87 @@
+
+;
+; Come up with the 84+CE header.
+; Didn't want to have to deal with external files
+; in testing with the 83+ because big files and needing to use shells?
+; fuck that noise.
+;
+
+;
+;Input: IX = 5 letter word to check against
+;
+
+    ld ix,testword
+programStart:
+    ld hl,dataFile
+    ld de,curword
+    ld bc,5
+    ldir
+programLoop:
+    ld a,(hl)
+    inc hl
+    or a,a
+    jr z,programEndNoFind
+    ld c,a
+    and a,31
+    cp 27
+    jr c,singleLetter
+    sub a,25
+    ld b,a
+programMultiLetter:
+    ld a,(hl)
+    inc hl
+    call wordTransform
+    djnz programMultiLetter
+    jr doCompare
+singleLetter:
+    call wordTransform
+doCompare:
+    ld b,5
+    ld hl,curword
+compareLoop:
+    ld a,(hl)
+    inc hl
+    cp a,(ix+0)
+    jr nz,programLoop   ;mismatch. Keep rolling.
+    inc ix
+    djnz compareLoop
+ProgramEndItemFound:
+    xor a,a
+    ret
+programEndNoFind:
+    ;issue an indication that the program has ended? or maybe wrap
+    ;in a full loop.
+    xor a,a
+    inc a,a ;clear zero flag (nz) for not found
+    ret
+
+wordTransform:
+    push hl
+        ld hl,curword
+        ld de,0
+        ld c,a
+        rlca
+        rlca
+        rlca
+        and a,7
+        ld e,a
+        add hl,de
+        ld a,c
+        and a,31
+        add a,(hl)
+        cp a,'Z'
+        jr c,wordTransformNowrap
+        sub a,26
+wordTransformNowrap:
+        ld (hl),a
+    pop hl
+    ret
+
+testword:
+.db "BAGGY"     ;Final entry in the current list.
+curword:
+.db 0,0,0,0,0
+
+dataFile:
+#import "OUPTUT.bin"
+

@@ -10,96 +10,106 @@ public _findWord
 ;
 ;Input: arg1 = 5 letter word to check against
 ;returns: HL = word found, else HL = -1
-;   
+;
 _findWord:
-    push ix
-    ld    ix,6
-    add   ix,sp
-    ld ix,(ix)
-    ld iy,0
-    ld hl,dataFile
-    ld de,curword
-    ld bc,5
-    ldir
-    ;HL = dataFile pointer, IY = word index, IX = test word pointer
+	push ix
+		ld	ix,6
+		add	ix,sp
+		ld	ix,(ix)
+		ld	iy,0
+		ld	hl,dataFile
+        ld  de,curword
+		ld	bc,5
+		ldir
+		ex	de,hl
+		;DE = dataFile ptr, IY = word idx, IX = test word ptr
+        jp doCompare    ;test initial word
 programLoop:
-    inc iy
-    ld a,(hl)
-    inc hl
-    or a,a
-    jr z,programEndNoFind
-    ld c,a
-    and a,31
-    cp 27
-    jr c,singleLetter
-    sub a,25
-    ld b,a
-programMultiLetter:
-    ld a,(hl)
-    inc hl
-    call wordTransform
-    djnz programMultiLetter
-    jr doCompare
-singleLetter:
-    ld a,c
-    call wordTransform
-doCompare:
-    ld b,5
-    push ix
-    pop de
-    push hl
-        ld hl,curword
-compareLoop:
-        ld a,(de)
+		inc	iy
+		ld	a,(de)
+		or	a,a
+		jr	z,searchExhausted
+		inc de
+		ld	b,a
+		and	a,31	;get lower 5 bits for letter delta
+		cp	a,27	;if eq or gt than 27, this is special code for multiletter
+		jr	nc,multiLetter
+		;Begin inline wordTransform
+		ld	c,a		;Current result of letter transform variable
+		ld	a,b
+		rlca
+		rlca
+		rlca
+		and	a,7
+		sbc	hl,hl
+		ld	l,a
+		ld	a,c     ;saved from prior calculation
+		ld	bc,curword
+		add	hl,bc
+		add	a,(hl)
+		cp	a,'Z'+1
+		jr	c,$+4
+		sub	a,26
+		ld	(hl),a		
+		;End inline wordTransform
+		jr	doCompare
+multiLetter:
+		sub	a,25
+		ld	b,a
+multiLetterLoop:
+		ld	a,(de)
+		rlca
+		rlca
+		rlca
+		and	a,7
+		sbc	hl,hl
+		ld	l,a
+		ld	a,b     ;preserve loop counter
+		ld	bc,curword
+		add	hl,bc
+		ld	b,a
+		ld	a,(de)
         inc de
-        cp a,(hl)
-        jr nz,compareMismatch   ;mismatch. Keep rolling.
-        inc hl
-        djnz compareLoop
-    pop hl
-ProgramEndItemFound:
-    xor a,a
-    push iy
-    pop hl
-    pop ix
-    ret
-compareMismatch:
-    pop hl
-    jr programLoop
-programEndNoFind:
-    ;issue an indication that the program has ended? or maybe wrap
-    ;in a full loop.
-    ld hl,-1
-    pop ix
-    ret
+		and	a,31
+		add	a,(hl)
+		cp	a,'Z'+1
+		jr	c,$+4
+		sub	a,26
+		ld	(hl),a
+		djnz multiLetterLoop
+doCompare:
+		lea	hl,ix+4
+		ld	bc,curword+4
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+wordWasFound:
+		lea	hl,iy+0
+	pop	ix
+	ret
+searchExhausted:
+		scf
+		sbc	hl,hl
+	pop ix
+	ret
+		
+	
 
-;A = bitpacked data
-wordTransform:
-    push hl
-        ld hl,curword
-        ld de,0
-        ld c,a
-        rlca
-        rlca
-        rlca
-        and a,7
-        ld e,a
-        add hl,de
-        ld a,c
-        and a,31
-        cp a,27
-        jr nc,$    ;BAD DATA TRAP
-        add a,(hl)
-        cp a,'Z'+1
-        jr c,wordTransformNowrap
-        sub a,26
-wordTransformNowrap:
-        ld (hl),a
-    pop hl
-    ret
 
 curword:
-db 0,0,0,0,0
+db 0,0,0,0,0,0
 
 dataFile:
 db $41, $41, $48, $45, $44, $11, $52, $8F, $24, $08, $58, $36, $17, $24, $02, $8B, $18

@@ -1,4 +1,4 @@
-
+section .text
 public _findWord
 ;
 ; Come up with the 84+CE header.

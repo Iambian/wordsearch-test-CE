@@ -12,8 +12,103 @@ public _findWord
 ;returns: HL = word found, else HL = -1
 ;
 _findWord:
-
-
+	push ix
+		ld	ix,6
+		add	ix,sp
+		ld	ix,(ix)
+		ld	iy,0
+		ld	hl,dataFile
+        ld  de,curword
+		ld	bc,5
+		ldir
+		ex	de,hl
+		;DE = dataFile ptr, IY = word idx, IX = test word ptr
+        jp doCompare    ;test initial word
+programLoop:
+		inc	iy
+		ld	a,(de)
+		or	a,a
+		jr	z,searchExhausted
+		inc de
+		ld	b,a
+		and	a,31	;get lower 5 bits for letter delta
+		cp	a,27	;if eq or gt than 27, this is special code for multiletter
+		jr	nc,multiLetter
+		;Begin inline wordTransform
+		ld	c,a		;Current result of letter transform variable
+		ld	a,b
+		rlca
+		rlca
+		rlca
+		and	a,7
+		sbc	hl,hl
+		ld	l,a
+		ld	a,c     ;saved from prior calculation
+		ld	bc,curword
+		add	hl,bc
+		add	a,(hl)
+		cp	a,'Z'+1
+		jr	c,$+4
+		sub	a,26
+		ld	(hl),a		
+		;End inline wordTransform
+		jr	doCompare
+multiLetter:
+		sub	a,25
+		ld	b,a
+multiLetterLoop:
+		ld	a,(de)
+		rlca
+		rlca
+		rlca
+		and	a,7
+		sbc	hl,hl
+		ld	l,a
+		ld	a,b     ;preserve loop counter
+		ld	bc,curword
+		add	hl,bc
+		ld	b,a
+		ld	a,(de)
+        inc de
+		and	a,31
+		add	a,(hl)
+		cp	a,'Z'+1
+		jr	c,$+4
+		sub	a,26
+		ld	(hl),a
+		djnz multiLetterLoop
+doCompare:
+		lea	hl,ix+4
+		ld	bc,curword+4
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+		ld a,(bc)
+		cpd
+		jr	nz,programLoop
+wordWasFound:
+		lea	hl,iy+0
+	pop	ix
+	ret
+searchExhausted:
+		scf
+		sbc	hl,hl
+	pop ix
+	ret
+		
+	
+repeat 1, size: $-_findWord
+display "_findword size: ",`size," bytes",10
+end repeat
 
 curword:
 db 0,0,0,0,0,0

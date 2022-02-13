@@ -4,7 +4,7 @@ public _findWord
 ; Come up with the 84+CE header.
 ; Didn't want to have to deal with external files
 ; in testing with the 83+ because big files and needing to use shells?
-; fuck that noise.
+; Not only "No", but "Hell no".
 ;
 
 ;
